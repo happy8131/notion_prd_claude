@@ -1,19 +1,12 @@
-import { Footer } from '@/components/layout/footer'
-import { Header } from '@/components/layout/header'
-import { CTASection } from '@/components/sections/cta'
-import { FeaturesSection } from '@/components/sections/features'
-import { HeroSection } from '@/components/sections/hero'
+import { redirect } from 'next/navigation'
 
-export default function Home() {
-  return (
-    <div className="flex min-h-screen flex-col">
-      <Header />
-      <main className="flex-1">
-        <HeroSection />
-        <FeaturesSection />
-        <CTASection />
-      </main>
-      <Footer />
-    </div>
-  )
+/**
+ * 루트 페이지 - 로그인 페이지로 리다이렉트
+ * 인증 미들웨어 설정 전 임시 리다이렉트
+ * TODO: Supabase 인증 상태 확인 후 조건부 리다이렉트 구현
+ *       - 로그인 상태: /invoices (견적서 목록)
+ *       - 미로그인 상태: /login
+ */
+export default function HomePage() {
+  redirect('/login')
 }

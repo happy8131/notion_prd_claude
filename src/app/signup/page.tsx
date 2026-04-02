@@ -1,4 +1,11 @@
-import { SignupForm } from '@/components/signup-form'
+import { Metadata } from 'next'
+
+import { SignupForm } from '@/components/auth/signup-form'
+
+export const metadata: Metadata = {
+  title: '회원가입',
+  description: '새 계정을 만들어 견적서 서비스를 시작하세요',
+}
 
 export default function SignupPage() {
   return (

@@ -1,0 +1,2 @@
+- [Invoice App 프로젝트 컨텍스트](project_invoice_app.md) — 초기화 완료 스택, 제거/추가 파일 목록, 기능 ID 매핑
+- [Zod v4 API 변경사항](feedback_zod_v4.md) — required_error → error 옵션 변경, 스키마 작성 시 적용

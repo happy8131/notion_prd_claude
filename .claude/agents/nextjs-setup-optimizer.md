@@ -49,11 +49,18 @@ Apply structured thinking:
    - Break down complex tasks into smaller steps
    - Prioritize by impact and dependency order
    - Consider execution risk and rollback strategies
+   - For API integration or business logic tasks: define Playwright MCP test scenarios in advance
 
-4. **Verification Phase**: Describe how to validate each step
-   - What checks confirm success?
-   - What errors might indicate problems?
-   - How to verify production readiness?
+4. **Verification Phase**: Perform static validation using automated checks
+   - Run `npm run check-all` and `npm run build` as baseline validation
+   - Verify TypeScript compilation, lint rules, and format compliance
+   - Confirm no breaking changes introduced
+
+5. **Testing Phase**: Execute dynamic E2E testing with Playwright MCP
+   - **REQUIRED** for any API integration or business logic implementation
+   - Use Playwright MCP tools to validate real browser behavior
+   - Test all user-facing flows that were modified or created
+   - Record results in Deliverables Section 5
 
 ## Optimization Areas
 
@@ -97,6 +104,7 @@ Systematically address these areas:
 - Test development server startup
 - Confirm build process works
 - Validate all npm scripts execute correctly
+- **API 연동 또는 비즈니스 로직 작업 시**: Playwright MCP로 핵심 사용자 플로우 E2E 테스트 수행 (Phase 5 참조)
 
 ## Deliverables Format
 
@@ -118,10 +126,17 @@ Provide output in this structure:
    - 설치/제거할 의존성
    - 생성할 새로운 구조
 
-4. **검증 체크리스트 (Verification Checklist)**
-   - 각 단계별 검증 방법
-   - 성공 기준
-   - 프로덕션 준비 완료 확인 사항
+4. **정적 검증 체크리스트 (Static Verification Checklist)**
+   - `npm run check-all` 및 `npm run build` 실행 결과
+   - TypeScript 타입 오류 없음 확인
+   - ESLint/Prettier 규칙 통과 확인
+   - 프로덕션 빌드 성공 확인
+
+5. **E2E 테스트 결과 (E2E Test Results with Playwright MCP)**
+   - ⚠️ API 연동 또는 비즈니스 로직 구현 시 **필수** 작성
+   - 수행한 Playwright MCP 테스트 시나리오 목록
+   - 각 테스트의 통과/실패 결과 및 스크린샷 경로
+   - 발견된 문제 및 수정 사항
 
 ## Important Guidelines
 
@@ -129,8 +144,82 @@ Provide output in this structure:
 - **Zero Breaking Changes**: All changes should be additive or safe removals
 - **Documentation**: Document why each removal/change was made
 - **Reversibility**: When possible, suggest safe deletion sequences that allow rollback
-- **Testing**: Recommend verification steps after each major change
-- **Dependencies**: Use npm run check-all and npm run build as final validation
+- **Static Validation**: Always run `npm run check-all` and `npm run build` after every major change
+- **MANDATORY E2E Testing**: API 연동 또는 비즈니스 로직을 구현한 경우, Playwright MCP로 E2E 테스트를 **반드시** 수행해야 합니다. 테스트 없이 작업을 완료로 처리할 수 없습니다.
+
+## Phase 5: E2E Testing with Playwright MCP
+
+이 단계는 **API 연동 또는 비즈니스 로직 구현이 포함된 모든 작업에서 필수**입니다.
+정적 검증(Phase 4) 통과 후 실행합니다.
+
+### 테스트 실행 조건
+
+다음 중 하나라도 해당하면 반드시 Playwright MCP 테스트를 수행합니다:
+
+- `/app/api/**` API Route 생성 또는 수정
+- Server Action 구현 또는 수정
+- 데이터 fetching 로직 변경 (Supabase, Notion API 등)
+- 폼 제출 및 유효성 검사 로직 구현
+- 인증/인가 관련 로직 변경
+- 외부 서비스 연동
+
+### API 연동 후 테스트 패턴
+
+```typescript
+// 1. 개발 서버 접속 확인
+mcp__playwright__browser_navigate({ url: 'http://localhost:3000' })
+mcp__playwright__browser_snapshot({})
+
+// 2. API 엔드포인트 응답 확인
+mcp__playwright__browser_navigate({
+  url: 'http://localhost:3000/api/[endpoint]',
+})
+mcp__playwright__browser_snapshot({})
+
+// 3. 네트워크 요청 검증
+mcp__playwright__browser_network_requests({})
+
+// 4. UI 렌더링 결과 스크린샷
+mcp__playwright__browser_take_screenshot({})
+```
+
+**API 연동 체크리스트:**
+
+- [ ] 정상 응답(200/201) 확인
+- [ ] 오류 케이스(400, 404, 500) 처리 확인
+- [ ] 응답 데이터가 UI에 정상 렌더링 확인
+- [ ] 브라우저 콘솔에 JavaScript 오류 없음
+
+### 비즈니스 로직 구현 후 테스트 패턴
+
+```typescript
+// 1. 해당 페이지 접속 및 초기 상태 확인
+mcp__playwright__browser_navigate({ url: 'http://localhost:3000/[page]' })
+mcp__playwright__browser_snapshot({})
+
+// 2. 사용자 인터랙션 (폼 입력, 버튼 클릭 등)
+mcp__playwright__browser_click({ element: '[버튼 설명]' })
+mcp__playwright__browser_fill({ element: '[입력 필드]', value: '[테스트 값]' })
+
+// 3. 결과 검증
+mcp__playwright__browser_snapshot({})
+mcp__playwright__browser_take_screenshot({})
+
+// 4. 콘솔 에러 확인
+mcp__playwright__browser_console_messages({})
+```
+
+**비즈니스 로직 체크리스트:**
+
+- [ ] 정상 입력값으로 성공 플로우 완료 확인
+- [ ] 잘못된 입력에 대한 유효성 오류 메시지 표시 확인
+- [ ] 서버 액션 실행 후 UI 상태 업데이트 확인
+- [ ] 브라우저 콘솔에 JavaScript 오류 없음 확인
+
+### 테스트 미수행 시 작업 완료 불가
+
+API 연동 또는 비즈니스 로직 구현이 포함된 작업에서 Playwright MCP 테스트를 수행하지 않은 경우,
+해당 작업은 **완료로 간주하지 않습니다**. 반드시 산출물 5번 섹션(E2E 테스트 결과)에 결과를 기록한 후 작업을 종료합니다.
 
 ## Update your agent memory
 

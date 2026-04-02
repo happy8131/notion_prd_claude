@@ -36,7 +36,15 @@ Notion 데이터베이스를 단일 데이터 소스(Single Source of Truth)로 
 | Phase 2: Notion 연동 및 견적서 목록 | 7일  | 2026-04-17  |
 | Phase 3: 견적서 상세 및 PDF         | 5일  | 2026-04-24  |
 | Phase 4: 접근 제어 및 유효성 표시   | 3일  | 2026-04-27  |
-| Phase 5: QA 및 배포                 | 3일  | 2026-04-30  |
+| Phase 5: E2E 테스트 및 배포         | 3일  | 2026-04-30  |
+
+### E2E 테스트 필수 원칙
+
+> **테스트 없이 작업 완료 불가** - API 연동 또는 비즈니스 로직을 구현한 모든 Phase는 반드시 Playwright MCP로 E2E 테스트를 수행해야 PR 머지 자격이 부여됩니다.
+
+- **도구**: Playwright MCP (`mcp__playwright__*` 도구 사용)
+- **적용 범위**: Phase 1 (인증) ~ Phase 4 (접근 제어) 전 기능
+- **테스트 실패 시**: 해당 Phase 작업은 미완료 상태로 간주
 
 ---
 
@@ -119,6 +127,8 @@ ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
 
 - `feat/env-setup`: 환경 변수 설정 및 외부 서비스 연결 검증
 
+> Phase 0은 인프라 구성 단계로 E2E 테스트보다 수동 연결 검증으로 완료 기준을 충족합니다.
+
 ---
 
 ### Phase 1: 인증 시스템 구현 (F010)
@@ -178,6 +188,28 @@ src/
 - [ ] 로그아웃 후 `/login`으로 리다이렉트
 - [ ] 비인증 상태에서 `/invoices` 접근 시 `/login`으로 리다이렉트
 - [ ] 인증 상태에서 `/login` 접근 시 `/invoices`로 리다이렉트
+
+#### E2E 테스트 필수 (Playwright MCP)
+
+> **이 Phase는 인증 로직을 포함하므로 반드시 Playwright MCP E2E 테스트를 수행해야 완료로 인정됩니다.**
+
+| 테스트 케이스                | 검증 항목                                        |
+| ---------------------------- | ------------------------------------------------ |
+| 회원가입 - SALES 역할        | 폼 입력 → 제출 → `users` 테이블 레코드 생성 확인 |
+| 회원가입 - CLIENT 역할       | `customer_name` 필드 표시 → 입력 → 제출 성공     |
+| 로그인 성공                  | 유효한 자격증명 → `/invoices` 리다이렉트         |
+| 로그인 실패                  | 잘못된 비밀번호 → 에러 메시지 표시               |
+| 로그아웃                     | 로그아웃 버튼 클릭 → `/login` 리다이렉트         |
+| 비인증 보호 라우트 접근      | `/invoices` 직접 접근 → `/login` 리다이렉트      |
+| 인증 상태 로그인 페이지 접근 | 로그인 후 `/login` 접근 → `/invoices` 리다이렉트 |
+
+```typescript
+// Playwright MCP 테스트 예시
+// mcp__playwright__browser_navigate: http://localhost:3000/signup
+// mcp__playwright__browser_fill_form: 이메일, 비밀번호, 역할 입력
+// mcp__playwright__browser_click: 회원가입 버튼
+// mcp__playwright__browser_snapshot: 성공 메시지 또는 리다이렉트 확인
+```
 
 #### PR 단위
 
@@ -265,6 +297,30 @@ src/
 - [ ] 데이터 로딩 중 Skeleton UI 표시
 - [ ] API 오류 시 에러 메시지 표시
 - [ ] 검색 결과 없을 시 빈 상태 메시지 표시
+
+#### E2E 테스트 필수 (Playwright MCP)
+
+> **이 Phase는 Notion API 연동을 포함하므로 반드시 Playwright MCP E2E 테스트를 수행해야 완료로 인정됩니다.**
+
+| 테스트 케이스    | 검증 항목                                       |
+| ---------------- | ----------------------------------------------- |
+| 견적서 목록 로드 | 로그인 후 `/invoices` → 목록 데이터 렌더링 확인 |
+| 견적서 번호 검색 | 검색어 입력 → 필터링된 결과 표시 확인           |
+| 고객명 검색      | 고객명 입력 → 해당 견적서만 표시 확인           |
+| 상태 필터링      | 상태 선택 → 해당 상태 견적서만 표시 확인        |
+| 페이지네이션     | 다음 페이지 이동 → 다른 데이터 로드 확인        |
+| 로딩 상태        | 페이지 로드 시 Skeleton UI 표시 확인            |
+| API 오류 처리    | 잘못된 API 키 환경에서 에러 메시지 표시 확인    |
+| 빈 검색 결과     | 존재하지 않는 검색어 → 빈 상태 메시지 확인      |
+
+```typescript
+// Playwright MCP 테스트 예시
+// mcp__playwright__browser_navigate: http://localhost:3000/invoices
+// mcp__playwright__browser_snapshot: 견적서 목록 렌더링 확인
+// mcp__playwright__browser_fill_form: 검색어 입력
+// mcp__playwright__browser_wait_for: 필터링 결과 로드 대기
+// mcp__playwright__browser_network_requests: /api/invoices 응답 200 확인
+```
 
 #### PR 단위
 
@@ -365,6 +421,31 @@ const handleDownload = async () => {
 - [ ] PDF 파일명은 `견적서_INV-XXXX-XXX.pdf` 형식
 - [ ] 뒤로가기 버튼 클릭 시 `/invoices` 페이지로 이동
 
+#### E2E 테스트 필수 (Playwright MCP)
+
+> **이 Phase는 Notion API 단건 조회 및 PDF 파일 생성 로직을 포함하므로 반드시 Playwright MCP E2E 테스트를 수행해야 완료로 인정됩니다.**
+
+| 테스트 케이스          | 검증 항목                                          |
+| ---------------------- | -------------------------------------------------- |
+| 견적서 상세 로드       | 목록에서 클릭 → `/invoices/[id]` 렌더링 확인       |
+| 기본 정보 표시         | 견적서 번호, 작성일, 유효기간, 상태 배지 표시 확인 |
+| 상품 목록 표시         | InvoiceItem 테이블 렌더링 확인                     |
+| 금액 요약 표시         | 소계/세금/총 금액이 통화 단위와 함께 표시 확인     |
+| PDF 다운로드 버튼 동작 | 버튼 클릭 → 파일 다운로드 트리거 확인              |
+| PDF 파일명 형식        | `견적서_INV-XXXX-XXX.pdf` 형식으로 저장 확인       |
+| 뒤로가기 버튼          | 클릭 → `/invoices` 페이지로 이동 확인              |
+| 존재하지 않는 ID 접근  | 잘못된 ID → 에러 페이지 또는 안내 메시지 표시      |
+
+```typescript
+// Playwright MCP 테스트 예시
+// mcp__playwright__browser_navigate: http://localhost:3000/invoices/[실제ID]
+// mcp__playwright__browser_snapshot: 견적서 상세 정보 렌더링 확인
+// mcp__playwright__browser_click: PDF 다운로드 버튼
+// mcp__playwright__browser_network_requests: /api/invoices/[id] 응답 200 확인
+// mcp__playwright__browser_navigate: http://localhost:3000/invoices/invalid-id
+// mcp__playwright__browser_snapshot: 에러 처리 확인
+```
+
 #### PR 단위
 
 - `feat/invoice-detail-api`: 견적서 상세 Notion 서비스 및 Route Handler
@@ -434,6 +515,36 @@ src/
 - [ ] 만료된 견적서는 회색으로 표시되며 만료 배지 노출
 - [ ] 상세 페이지에서 만료 임박/만료된 견적서에 경고 배너 표시
 
+#### E2E 테스트 필수 (Playwright MCP)
+
+> **이 Phase는 역할 기반 조건부 렌더링 및 접근 제어 로직을 포함하므로 반드시 Playwright MCP E2E 테스트를 수행해야 완료로 인정됩니다.**
+
+| 테스트 케이스                  | 검증 항목                                                    |
+| ------------------------------ | ------------------------------------------------------------ |
+| SALES 역할 - 전체 목록 접근    | SALES 계정 로그인 → 모든 고객 견적서 목록 표시 확인          |
+| CLIENT 역할 - 본인 목록만 표시 | CLIENT 계정 로그인 → 본인 `customer_name` 견적서만 표시 확인 |
+| CLIENT - 타 고객 URL 직접 접근 | 타 고객 견적서 ID 직접 URL 접근 → 403/접근 거부 메시지 확인  |
+| CLIENT - 본인 견적서 상세 접근 | 본인 견적서 URL 직접 접근 → 정상 렌더링 확인                 |
+| 유효한 견적서 상태 표시        | 유효기간이 남은 견적서 → 녹색 인디케이터 확인                |
+| 만료 임박 견적서 표시          | 7일 이내 만료 견적서 → 주황색 경고 배지 확인                 |
+| 만료된 견적서 표시             | 만료된 견적서 → 회색 처리 및 만료 배지 확인                  |
+| 상세 페이지 만료 경고 배너     | 만료 임박/만료 견적서 상세 → 경고 배너 표시 확인             |
+
+```typescript
+// Playwright MCP 테스트 예시 - 역할 기반 접근 제어
+// [SALES 역할 테스트]
+// mcp__playwright__browser_navigate: http://localhost:3000/login
+// mcp__playwright__browser_fill_form: SALES 계정 자격증명 입력
+// mcp__playwright__browser_snapshot: 모든 고객 견적서 목록 확인
+
+// [CLIENT 역할 테스트]
+// mcp__playwright__browser_navigate: http://localhost:3000/login
+// mcp__playwright__browser_fill_form: CLIENT 계정 자격증명 입력
+// mcp__playwright__browser_snapshot: 본인 견적서만 표시 확인
+// mcp__playwright__browser_navigate: http://localhost:3000/invoices/[타고객ID]
+// mcp__playwright__browser_snapshot: 접근 거부 메시지 확인
+```
+
 #### PR 단위
 
 - `feat/role-based-access`: 역할 기반 API 필터링 및 접근 제어
@@ -441,51 +552,130 @@ src/
 
 ---
 
-### Phase 5: QA, 성능 최적화 및 배포
+### Phase 5: E2E 테스트, QA 및 배포
 
-- **목표**: 전체 기능을 검증하고 프로덕션 환경에 배포합니다.
+- **목표**: Playwright MCP를 활용한 전체 사용자 시나리오 E2E 테스트를 완료하고, 검증된 빌드를 프로덕션에 배포합니다.
 - **예상 기간**: 3일
 - **우선순위**: Must Have
-- **선행 요구사항**: Phase 0 ~ Phase 4 완료
+- **선행 요구사항**: Phase 0 ~ Phase 4 완료 (각 Phase E2E 테스트 포함)
+
+> **배포 전제 조건**: 아래 모든 E2E 테스트 시나리오가 Playwright MCP로 통과되어야 배포 작업을 시작할 수 있습니다.
 
 #### 작업 목록
 
-| 작업 | 설명                                                                      | 소요 시간 |
-| ---- | ------------------------------------------------------------------------- | --------- |
-| 5-1  | 전체 사용자 시나리오 수동 테스트 (영업팀 여정, 클라이언트 여정)           | 1일       |
-| 5-2  | 에러 상황 처리 검증 - Notion API 오류, Supabase 연결 실패, 잘못된 ID 접근 | 0.5일     |
-| 5-3  | 반응형 UI 검증 - 모바일/태블릿/데스크탑                                   | 0.5일     |
-| 5-4  | Vercel 또는 동등 플랫폼 배포 설정 및 환경 변수 구성                       | 0.5일     |
-| 5-5  | 프로덕션 배포 후 스모크 테스트                                            | 0.5일     |
+| 작업 | 설명                                                                                    | 소요 시간 |
+| ---- | --------------------------------------------------------------------------------------- | --------- |
+| 5-1  | Playwright MCP 전체 E2E 테스트 - 영업팀 전체 여정 자동화 테스트                         | 0.5일     |
+| 5-2  | Playwright MCP 전체 E2E 테스트 - 클라이언트 전체 여정 자동화 테스트                     | 0.5일     |
+| 5-3  | 에러 시나리오 E2E 테스트 - Notion API 오류, 잘못된 ID, 권한 없는 접근                   | 0.5일     |
+| 5-4  | 반응형 UI 검증 - Playwright MCP로 모바일(375px)/태블릿(768px)/데스크탑(1280px) 스크린샷 | 0.5일     |
+| 5-5  | Vercel 또는 동등 플랫폼 배포 설정 및 환경 변수 구성                                     | 0.5일     |
+| 5-6  | 프로덕션 배포 후 스모크 테스트 (Playwright MCP)                                         | 0.5일     |
 
-#### 테스트 시나리오
+#### E2E 테스트 시나리오 (Playwright MCP 필수)
 
-**영업팀 시나리오**
+**시나리오 A: 영업팀 전체 여정**
 
-1. 영업팀 계정으로 로그인
-2. 견적서 목록에서 모든 고객의 견적서가 표시됨 확인
-3. 검색 및 필터링 동작 확인
-4. 특정 견적서 클릭 후 상세 정보 확인
-5. PDF 다운로드 동작 확인
-6. 로그아웃
+```typescript
+// 1. 로그인
+// mcp__playwright__browser_navigate: http://localhost:3000/login
+// mcp__playwright__browser_fill_form: SALES 계정 자격증명
+// mcp__playwright__browser_click: 로그인 버튼
+// mcp__playwright__browser_wait_for: /invoices 페이지 로드
 
-**클라이언트 시나리오**
+// 2. 견적서 목록 확인
+// mcp__playwright__browser_snapshot: 모든 고객 견적서 목록 렌더링 확인
 
-1. 클라이언트 계정으로 로그인
-2. 본인 고객명의 견적서만 목록에 표시됨 확인
-3. 타 고객 견적서 URL 직접 접근 시 접근 거부 확인
-4. 본인 견적서 상세 조회 확인
-5. PDF 다운로드 확인
-6. 만료된 견적서 상태 표시 확인
+// 3. 검색 및 필터링
+// mcp__playwright__browser_fill_form: 검색어 입력
+// mcp__playwright__browser_snapshot: 필터링 결과 확인
+// mcp__playwright__browser_select_option: 상태 필터 선택
+// mcp__playwright__browser_snapshot: 상태별 필터링 결과 확인
+
+// 4. 견적서 상세 조회
+// mcp__playwright__browser_click: 견적서 행 클릭
+// mcp__playwright__browser_snapshot: 상세 정보 렌더링 확인
+
+// 5. PDF 다운로드
+// mcp__playwright__browser_click: PDF 다운로드 버튼
+// mcp__playwright__browser_wait_for: 다운로드 트리거 확인
+
+// 6. 로그아웃
+// mcp__playwright__browser_click: 로그아웃 버튼
+// mcp__playwright__browser_snapshot: /login 리다이렉트 확인
+```
+
+**시나리오 B: 클라이언트 전체 여정**
+
+```typescript
+// 1. 로그인
+// mcp__playwright__browser_navigate: http://localhost:3000/login
+// mcp__playwright__browser_fill_form: CLIENT 계정 자격증명
+// mcp__playwright__browser_click: 로그인 버튼
+
+// 2. 본인 견적서만 표시 확인
+// mcp__playwright__browser_snapshot: 본인 customer_name 견적서만 표시 확인
+
+// 3. 타 고객 견적서 직접 URL 접근 차단 확인
+// mcp__playwright__browser_navigate: http://localhost:3000/invoices/[타고객ID]
+// mcp__playwright__browser_snapshot: 접근 거부 메시지 확인
+
+// 4. 본인 견적서 상세 및 PDF
+// mcp__playwright__browser_navigate: http://localhost:3000/invoices/[본인ID]
+// mcp__playwright__browser_snapshot: 상세 정보 확인
+// mcp__playwright__browser_click: PDF 다운로드 버튼
+
+// 5. 만료 견적서 상태 시각화 확인
+// mcp__playwright__browser_snapshot: 만료 배지, 경고 배너 렌더링 확인
+```
+
+**시나리오 C: 에러 처리 검증**
+
+```typescript
+// 존재하지 않는 견적서 ID 접근
+// mcp__playwright__browser_navigate: http://localhost:3000/invoices/nonexistent-id
+// mcp__playwright__browser_snapshot: 404 에러 페이지 또는 안내 메시지 확인
+
+// 비인증 상태 보호 라우트 접근
+// mcp__playwright__browser_navigate: http://localhost:3000/invoices
+// mcp__playwright__browser_snapshot: /login 리다이렉트 확인
+```
+
+**시나리오 D: 반응형 UI 검증**
+
+```typescript
+// 모바일 (375px)
+// mcp__playwright__browser_resize: width=375, height=812
+// mcp__playwright__browser_navigate: http://localhost:3000/invoices
+// mcp__playwright__browser_take_screenshot: 모바일 레이아웃 스크린샷
+
+// 태블릿 (768px)
+// mcp__playwright__browser_resize: width=768, height=1024
+// mcp__playwright__browser_take_screenshot: 태블릿 레이아웃 스크린샷
+
+// 데스크탑 (1280px)
+// mcp__playwright__browser_resize: width=1280, height=800
+// mcp__playwright__browser_take_screenshot: 데스크탑 레이아웃 스크린샷
+```
 
 #### 완료 기준
 
-- [ ] 영업팀/클라이언트 전체 시나리오 오류 없이 동작
-- [ ] Notion API 오류 시 사용자 친화적 에러 메시지 표시
-- [ ] 모바일(375px) 기준 레이아웃 깨짐 없음
-- [ ] `npm run build` 에러 없이 성공
+**E2E 테스트 완료 기준 (배포 전 필수)**
+
+- [ ] 시나리오 A (영업팀 여정) - Playwright MCP 테스트 전 단계 통과
+- [ ] 시나리오 B (클라이언트 여정) - Playwright MCP 테스트 전 단계 통과
+- [ ] 시나리오 C (에러 처리) - 에러 케이스 모두 적절한 UI 응답 확인
+- [ ] 시나리오 D (반응형) - 375px/768px/1280px 스크린샷 레이아웃 정상
+
+**정적 검증 기준**
+
 - [ ] `npm run check-all` 통과
-- [ ] 프로덕션 URL에서 로그인부터 PDF 다운로드까지 동작 확인
+- [ ] `npm run build` 에러 없이 성공
+
+**배포 완료 기준**
+
+- [ ] Vercel 환경 변수 설정 완료
+- [ ] 프로덕션 URL에서 로그인부터 PDF 다운로드까지 Playwright MCP 스모크 테스트 통과
 
 #### PR 단위
 
@@ -590,8 +780,19 @@ style: 코드 포맷팅
 
 - [ ] `npm run check-all` 통과
 - [ ] `npm run build` 성공
-- [ ] 관련 기능 수동 테스트 완료
+- [ ] **API 연동 또는 비즈니스 로직 구현 시 Playwright MCP E2E 테스트 필수 완료**
 - [ ] 코드 리뷰 승인 (1인 개발 시 셀프 리뷰)
+
+> Phase별 E2E 테스트 적용 기준:
+>
+> | Phase   | E2E 테스트 필수 여부 | 비고                                  |
+> | ------- | -------------------- | ------------------------------------- |
+> | Phase 0 | 수동 검증으로 대체   | 인프라 구성 단계                      |
+> | Phase 1 | **필수**             | 인증 로직 (signIn/signUp/signOut)     |
+> | Phase 2 | **필수**             | Notion API 연동 (목록 조회/검색/필터) |
+> | Phase 3 | **필수**             | Notion API 연동 + PDF 생성 로직       |
+> | Phase 4 | **필수**             | 역할 기반 접근 제어 조건부 렌더링     |
+> | Phase 5 | **필수**             | 전체 사용자 여정 종합 테스트          |
 
 ---
 

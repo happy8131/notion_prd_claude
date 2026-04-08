@@ -17,6 +17,10 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: ['lucide-react'],
   },
+  // trace 파일 출력 비활성화 (Windows 파일 권한 문제 해결)
+  outputFileTracingExcludes: {
+    '*': ['**/.next/trace'],
+  },
   async headers() {
     return [
       {

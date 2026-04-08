@@ -1,0 +1,62 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e3]:
+      - heading "견적서 목록" [level=1] [ref=e4]
+      - paragraph [ref=e5]: Notion에서 동기화된 견적서 목록입니다
+    - generic [ref=e6]:
+      - generic [ref=e7]:
+        - generic [ref=e8]:
+          - generic [ref=e9]: 검색 (견적서 번호 또는 고객명)
+          - textbox "검색어를 입력하세요" [ref=e10]
+        - generic [ref=e11]:
+          - generic [ref=e12]: 상태
+          - combobox [ref=e13]:
+            - generic: 전체
+            - img [ref=e14]
+        - generic [ref=e16]:
+          - generic [ref=e17]: 통화
+          - combobox [ref=e18]:
+            - generic: 전체
+            - img [ref=e19]
+      - generic [ref=e21]:
+        - generic [ref=e22]:
+          - generic [ref=e23]: 발행일 (시작)
+          - textbox [ref=e24]
+        - generic [ref=e25]:
+          - generic [ref=e26]: 발행일 (종료)
+          - textbox [ref=e27]
+        - button "초기화" [ref=e29]
+    - table [ref=e32]:
+      - rowgroup [ref=e33]:
+        - row "견적서 번호 고객명 금액 상태 발행일 유효기간" [ref=e34]:
+          - columnheader "견적서 번호" [ref=e35]
+          - columnheader "고객명" [ref=e36]
+          - columnheader "금액" [ref=e37]
+          - columnheader "상태" [ref=e38]
+          - columnheader "발행일" [ref=e39]
+          - columnheader "유효기간" [ref=e40]
+      - rowgroup [ref=e41]:
+        - row "INV-2026-002 XYZ 디자인 ₩1,450,000 대기 2026. 02. 27. 2026. 03. 29." [ref=e42]:
+          - cell "INV-2026-002" [ref=e43]:
+            - link "INV-2026-002" [ref=e44] [cursor=pointer]:
+              - /url: /invoices/31485627-029d-8131-ac0c-f27ff3b013a3
+          - cell "XYZ 디자인" [ref=e45]
+          - cell "₩1,450,000" [ref=e46]
+          - cell "대기" [ref=e47]:
+            - generic [ref=e48]: 대기
+          - cell "2026. 02. 27." [ref=e49]
+          - cell "2026. 03. 29." [ref=e50]
+        - row "INV-2025-001 ABC 회사 ₩500,000 대기 2026. 02. 04. 2026. 02. 27." [ref=e51]:
+          - cell "INV-2025-001" [ref=e52]:
+            - link "INV-2025-001" [ref=e53] [cursor=pointer]:
+              - /url: /invoices/31485627-029d-806a-b90e-c2890a88dbcc
+          - cell "ABC 회사" [ref=e54]
+          - cell "₩500,000" [ref=e55]
+          - cell "대기" [ref=e56]:
+            - generic [ref=e57]: 대기
+          - cell "2026. 02. 04." [ref=e58]
+          - cell "2026. 02. 27." [ref=e59]
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e65] [cursor=pointer]:
+    - img [ref=e66]
+  - alert [ref=e69]

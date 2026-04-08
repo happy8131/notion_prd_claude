@@ -1,0 +1,52 @@
+- generic [active] [ref=e1]:
+    - generic [ref=e59]:
+        - generic [ref=e60]:
+            - generic [ref=e61]:
+                - heading "INV-2026-002" [level=1] [ref=e62]
+                - paragraph [ref=e63]: XYZ 디자인의 견적서
+            - generic [ref=e64]:
+                - link "뒤로가기" [ref=e65] [cursor=pointer]:
+                    - /url: /invoices
+                    - button "뒤로가기" [ref=e66]
+                - button "PDF 다운로드" [ref=e67]
+        - generic [ref=e68]:
+            - generic [ref=e69]:
+                - generic [ref=e71]: 기본 정보
+                - generic [ref=e73]:
+                    - generic [ref=e74]:
+                        - paragraph [ref=e75]: 견적서 번호
+                        - paragraph [ref=e76]: INV-2026-002
+                    - generic [ref=e77]:
+                        - paragraph [ref=e78]: 상태
+                        - generic [ref=e80]: 대기
+                    - generic [ref=e81]:
+                        - paragraph [ref=e82]: 발행일
+                        - paragraph [ref=e83]: 2026. 02. 27.
+                    - generic [ref=e84]:
+                        - paragraph [ref=e85]: 유효기간
+                        - paragraph [ref=e86]: 2026. 03. 29.
+            - generic [ref=e87]:
+                - generic [ref=e89]: 고객 정보
+                - generic [ref=e91]:
+                    - generic [ref=e92]:
+                        - paragraph [ref=e93]: 고객명
+                        - paragraph [ref=e94]: XYZ 디자인
+                    - generic [ref=e95]:
+                        - paragraph [ref=e96]: 이메일
+                        - paragraph [ref=e97]: '-'
+        - generic [ref=e98]:
+            - generic [ref=e100]: 상품 목록
+            - generic [ref=e101]: 상품 정보가 없습니다.
+        - generic [ref=e103]:
+            - generic [ref=e105]: 금액 요약
+            - generic [ref=e107]:
+                - generic [ref=e108]:
+                    - generic [ref=e109]: 소계
+                    - generic [ref=e110]: ₩1,450,000
+                - generic [ref=e111]:
+                    - generic [ref=e112]: 총 금액
+                    - generic [ref=e113]: ₩1,450,000
+    - region "Notifications alt+T"
+    - button "Open Next.js Dev Tools" [ref=e54] [cursor=pointer]:
+        - img [ref=e55]
+    - alert [ref=e58]: 견적서 - INV-2026-002 | 견적서 관리 시스템

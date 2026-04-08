@@ -118,11 +118,13 @@ docs/                   # 개발 문서
 
 - **함수형 컴포넌트 필수**: 클래스 컴포넌트 금지
 - **Named export 사용**:
+
   ```typescript
   export function InvoiceForm() { ... }
   ```
 
   - ❌ `export default function ...`는 특수한 경우만
+
 - **Props 타입 정의**:
   ```typescript
   interface InvoiceFormProps {

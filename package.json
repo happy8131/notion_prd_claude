@@ -12,6 +12,7 @@
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
     "check-all": "npm run typecheck && npm run lint && npm run format:check",
+    "notion:verify": "npx tsx src/lib/notion/verify.ts",
     "prepare": "husky"
   },
   "dependencies": {
@@ -36,6 +37,7 @@
     "lucide-react": "^0.543.0",
     "next": "15.5.3",
     "next-themes": "^0.4.6",
+    "radix-ui": "^1.4.3",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-hook-form": "^7.63.0",

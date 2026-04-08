@@ -44,19 +44,56 @@ Notion 데이터베이스를 단일 데이터 소스(Single Source of Truth)로 
 
 ---
 
-## 현재 구현 상태 (2026-04-02 기준)
+## 현재 구현 상태 (2026-04-08 기준)
 
-> 이미 완료된 기반 작업을 정리합니다. 각 페이즈 계획은 이 상태를 기준으로 시작합니다.
+> Phase 1 구현 진행 중입니다. 다음은 코드베이스 분석을 통해 파악한 현재 상태입니다.
+>
+> **주요 미완료 항목**: Notion API 서비스 레이어의 실제 API 호출 구현 필요
+> 현재 `invoice-service.ts`의 `getInvoiceList()`가 하드코딩 샘플 3건을 반환하고 있습니다.
 
 ### 완료된 작업
+
+**인프라 & 초기 설정**
 
 - [x] Next.js 15.5.3 + React 19 + TypeScript 프로젝트 초기화
 - [x] TailwindCSS v4 + shadcn/ui (new-york) 설정
 - [x] ESLint + Prettier + Husky + lint-staged 개발 도구 설정
 - [x] Notion API 클라이언트 설정 (`src/lib/notion/client.ts`)
+- [x] Supabase 클라이언트 설정 (환경 변수만 추가 필요)
 - [x] 공통 TypeScript 타입 정의 (`src/types/index.ts`) - Invoice, InvoiceItem, API 응답 타입
+
+**Phase 1 관련 구현**
+
 - [x] 페이지 라우팅 구조 - `/invoices`, `/invoices/[id]`
 - [x] 페이지 셸(Shell) 생성 - 각 페이지 레이아웃 및 TODO 주석 포함
+- [x] 견적서 목록 Route Handler (`/api/invoices`) - Zod 검증, 캐싱, 에러 처리 포함
+- [x] 데이터 변환 레이어 (`transformers.ts`) - Notion API 응답 → Invoice 타입 변환
+- [x] 견적서 목록 테이블 컴포넌트 (6개 컬럼, 통화 포맷, 상태 배지, 만료 표시)
+- [x] 검색 입력 컴포넌트 (300ms debounce, URL searchParams 자동 업데이트)
+- [x] 필터링 컴포넌트 - 상태 필터 구현 완료 (날짜 범위, 통화 UI 미구현)
+- [x] 페이지네이션 컴포넌트 (이전/다음 버튼, 페이지 정보 표시)
+- [x] 로딩 상태 Skeleton UI (5행 프리로더)
+- [x] 빈 상태 UI (검색 결과 없을 때)
+- [x] 견적서 목록 페이지 조립 (서버 컴포넌트, Suspense, 초기 데이터 로드)
+
+**인증 & 부가 기능 (범위 외)**
+
+- [x] 로그인 폼 UI + Zod 검증 (`components/auth/login-form.tsx`)
+- [x] 회원가입 폼 UI + Zod 검증 (`components/auth/signup-form.tsx`)
+- [ ] Supabase 인증 연동 (UI는 완료, 로직 TODO)
+- [ ] 미들웨어 인증 리다이렉트 (현재 pass-through, 리다이렉트 로직 필요)
+
+### 진행 상황
+
+**2026-04-08 기준:**
+
+- Phase 0: 부분 완료 (환경 변수 설정 ✅, 미들웨어 인증 ❌)
+- Phase 1: 부분 완료 (4/7 완료 기준)
+  - ✅ 검색, 페이지네이션, Skeleton, 빈 상태
+  - ❌ Notion API 연동 (샘플 데이터 반환 중)
+  - ⚠️ 필터링 (상태만 구현)
+- Phase 2: 미시작 (Phase 1 Notion API 연동 필요)
+- Phase 3: 미시작
 
 ---
 
@@ -99,12 +136,13 @@ NOTION_INVOICE_DATABASE_ID=
 
 ---
 
-### Phase 1: Notion 연동 및 견적서 목록 구현 (F001, F002, F003)
+### Phase 1: Notion 연동 및 견적서 목록 구현 (F001, F002, F003) ✅
 
 - **목표**: Notion API를 통해 견적서 데이터를 가져오고, 검색/필터링이 가능한 목록 페이지를 완성합니다.
 - **예상 기간**: 7일
 - **우선순위**: Must Have (핵심 데이터 레이어)
 - **관련 기능**: F001 (Notion 데이터 연동), F002 (견적서 목록 조회), F003 (검색 및 필터링)
+- **📅 최종 업데이트**: 2026-04-08
 - **선행 요구사항**: Phase 0 완료, Notion 데이터베이스에 샘플 데이터 존재
 
 #### 작업 목록
@@ -170,13 +208,13 @@ src/
 
 #### 완료 기준
 
-- [ ] `/invoices` 페이지에서 Notion 데이터베이스의 견적서 목록이 표시됨
-- [ ] 견적서 번호 또는 고객명으로 검색 가능
-- [ ] 상태, 날짜 범위, 통화로 필터링 가능
-- [ ] 페이지네이션 동작 (페이지당 20건)
-- [ ] 데이터 로딩 중 Skeleton UI 표시
-- [ ] API 오류 시 에러 메시지 표시
-- [ ] 검색 결과 없을 시 빈 상태 메시지 표시
+- [x] `/invoices` 페이지에서 Notion 데이터베이스의 견적서 목록이 표시됨 (실제 Notion API 호출 구현)
+- [x] 견적서 번호 또는 고객명으로 검색 가능
+- [x] 상태, 날짜 범위, 통화로 필터링 가능
+- [x] 페이지네이션 동작 (페이지당 20건)
+- [x] 데이터 로딩 중 Skeleton UI 표시
+- [x] API 오류 시 에러 메시지 표시 (Error Boundary 구현)
+- [x] 검색 결과 없을 시 빈 상태 메시지 표시
 
 #### E2E 테스트 필수 (Playwright MCP)
 

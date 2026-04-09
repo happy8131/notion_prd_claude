@@ -52,37 +52,26 @@ export function PdfDownloadButton({
           allowTaint: true,
           removeContainer: false,
           imageTimeout: 0,
-          // iframe 내부에서 Tailwind 클래스 제거
+          // iframe 내부에서 Tailwind CSS 제거
           onclone: clonedDocument => {
-            console.log('[PDF] onclone 콜백: iframe 내 클래스 제거 시작')
+            console.log('[PDF] onclone 콜백: CSS 비활성화 시작')
             try {
-              // iframe 내에서 원본 element 찾기
-              const clonedElement = clonedDocument.getElementById(
-                'invoice-pdf-template'
-              )
-              if (!clonedElement) {
-                console.error(
-                  '[PDF] iframe 내에서 invoice-pdf-template을 찾을 수 없음'
-                )
-                return
-              }
+              // 1. 모든 <style> 태그 제거
+              const styleElements = clonedDocument.querySelectorAll('style')
+              console.log('[PDF] <style> 태그 제거:', styleElements.length)
+              styleElements.forEach(el => el.remove())
 
-              console.log('[PDF] iframe 내 요소 발견:', clonedElement.id)
+              // 2. 모든 <link> 태그 제거 (외부 CSS 제거)
+              const linkElements = clonedDocument.querySelectorAll('link')
+              console.log('[PDF] <link> 태그 제거:', linkElements.length)
+              linkElements.forEach(el => el.remove())
 
-              // 모든 요소의 class 제거 (root 포함)
-              const allElements = [
-                clonedElement,
-                ...Array.from(clonedElement.querySelectorAll('*')),
-              ]
+              // 3. 모든 요소의 class 제거
+              clonedDocument
+                .querySelectorAll('*')
+                .forEach(el => el.removeAttribute('class'))
 
-              allElements.forEach(el => {
-                if (el instanceof HTMLElement) {
-                  el.removeAttribute('class')
-                  console.log('[PDF] 클래스 제거 완료 -', el.tagName)
-                }
-              })
-
-              console.log('[PDF] onclone 완료: 모든 클래스 제거됨')
+              console.log('[PDF] onclone 완료: CSS 및 클래스 제거됨')
             } catch (oncloneError) {
               console.error('[PDF] onclone 내부 오류:', oncloneError)
             }

@@ -39,47 +39,54 @@ export function PdfDownloadButton({
 
       console.log('[PDF] html2canvas, jsPDF import 완료')
 
-      // 요소 복제 및 모든 Tailwind 클래스 제거
-      const clonedElement = element.cloneNode(true) as HTMLElement
-
-      // 모든 요소의 class 제거 (root 포함)
-      const allElements = [
-        clonedElement,
-        ...Array.from(clonedElement.querySelectorAll('*')),
-      ]
-      allElements.forEach(el => {
-        if (el instanceof HTMLElement) {
-          // data-* attributes는 유지하되 class와 style attribute만 처리
-          el.removeAttribute('class')
-          // style 속성 검증: lab() 관련 CSS 제거
-          if (el.getAttribute('style')) {
-            const originalStyle = el.getAttribute('style') || ''
-            const cleanedStyle = originalStyle.replace(
-              /lab\([^)]*\)/g,
-              '#ffffff'
-            )
-            if (cleanedStyle !== originalStyle) {
-              console.log('[PDF] lab() 색상 정리:', originalStyle)
-              el.setAttribute('style', cleanedStyle)
-            }
-          }
-        }
-      })
-
-      console.log('[PDF] 클래스 및 스타일 정리 완료')
-
       // HTML을 Canvas로 캡처
+      // onclone 콜백: iframe 내부에서 Tailwind 클래스 제거
       let canvas
       try {
         console.log('[PDF] html2canvas 옵션으로 캡처 시작')
-        canvas = await html2canvas(clonedElement, {
+        canvas = await html2canvas(element, {
           scale: 2,
           useCORS: true,
           backgroundColor: '#ffffff',
           logging: true,
           allowTaint: true,
-          removeContainer: true,
+          removeContainer: false,
           imageTimeout: 0,
+          // iframe 내부에서 Tailwind 클래스 제거
+          onclone: clonedDocument => {
+            console.log('[PDF] onclone 콜백: iframe 내 클래스 제거 시작')
+            try {
+              // iframe 내에서 원본 element 찾기
+              const clonedElement = clonedDocument.getElementById(
+                'invoice-pdf-template'
+              )
+              if (!clonedElement) {
+                console.error(
+                  '[PDF] iframe 내에서 invoice-pdf-template을 찾을 수 없음'
+                )
+                return
+              }
+
+              console.log('[PDF] iframe 내 요소 발견:', clonedElement.id)
+
+              // 모든 요소의 class 제거 (root 포함)
+              const allElements = [
+                clonedElement,
+                ...Array.from(clonedElement.querySelectorAll('*')),
+              ]
+
+              allElements.forEach(el => {
+                if (el instanceof HTMLElement) {
+                  el.removeAttribute('class')
+                  console.log('[PDF] 클래스 제거 완료 -', el.tagName)
+                }
+              })
+
+              console.log('[PDF] onclone 완료: 모든 클래스 제거됨')
+            } catch (oncloneError) {
+              console.error('[PDF] onclone 내부 오류:', oncloneError)
+            }
+          },
         })
         console.log('[PDF] 캔버스 생성 완료:', canvas.width, 'x', canvas.height)
       } catch (canvasError) {

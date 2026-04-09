@@ -34,13 +34,22 @@ export function PdfDownloadButton({
       const html2canvas = (await import('html2canvas')).default
       const { jsPDF } = await import('jspdf')
 
+      // 요소 복제 및 Tailwind 클래스 제거 (html2canvas가 lab() 색상을 파싱하는 것을 방지)
+      const clonedElement = element.cloneNode(true) as HTMLElement
+      clonedElement.querySelectorAll('*').forEach(el => {
+        const htmlEl = el as HTMLElement
+        // 모든 class 제거 (invoice-pdf-template은 inline styles 사용)
+        htmlEl.removeAttribute('class')
+      })
+
       // HTML을 Canvas로 캡처
-      const canvas = await html2canvas(element, {
+      const canvas = await html2canvas(clonedElement, {
         scale: 2,
         useCORS: true,
         backgroundColor: '#ffffff',
         logging: false,
         allowTaint: true,
+        removeContainer: true,
       })
 
       // Canvas를 PNG 이미지로 변환

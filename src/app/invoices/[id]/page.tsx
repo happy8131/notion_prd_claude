@@ -63,7 +63,7 @@ export default async function InvoiceDetailPage({
   return (
     <div className="container mx-auto py-8">
       {/* PDF 템플릿 (숨김) - html2canvas로 캡처용 */}
-      <div className="absolute top-0 -left-[9999px]">
+      <div style={{ position: 'absolute', top: 0, left: '-9999px' }}>
         <InvoicePdfTemplate invoice={invoice} />
       </div>
 

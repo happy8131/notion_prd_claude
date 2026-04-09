@@ -1,8 +1,8 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
-import { useState } from 'react'
 import type { Invoice } from '@/types'
+import { useState } from 'react'
 
 interface PdfDownloadButtonProps {
   invoice: Invoice
@@ -27,33 +27,75 @@ export function PdfDownloadButton({
       // DOM 요소 가져오기
       const element = document.getElementById('invoice-pdf-template')
       if (!element) {
+        console.error('PDF 템플릿 요소를 찾을 수 없습니다')
         throw new Error('PDF 템플릿 요소를 찾을 수 없습니다.')
       }
+
+      console.log('[PDF] 템플릿 요소 발견:', element.id)
 
       // 동적 import (SSR 방지)
       const html2canvas = (await import('html2canvas')).default
       const { jsPDF } = await import('jspdf')
 
-      // 요소 복제 및 Tailwind 클래스 제거 (html2canvas가 lab() 색상을 파싱하는 것을 방지)
+      console.log('[PDF] html2canvas, jsPDF import 완료')
+
+      // 요소 복제 및 모든 Tailwind 클래스 제거
       const clonedElement = element.cloneNode(true) as HTMLElement
-      clonedElement.querySelectorAll('*').forEach(el => {
-        const htmlEl = el as HTMLElement
-        // 모든 class 제거 (invoice-pdf-template은 inline styles 사용)
-        htmlEl.removeAttribute('class')
+
+      // 모든 요소의 class 제거 (root 포함)
+      const allElements = [
+        clonedElement,
+        ...Array.from(clonedElement.querySelectorAll('*')),
+      ]
+      allElements.forEach(el => {
+        if (el instanceof HTMLElement) {
+          // data-* attributes는 유지하되 class와 style attribute만 처리
+          el.removeAttribute('class')
+          // style 속성 검증: lab() 관련 CSS 제거
+          if (el.getAttribute('style')) {
+            const originalStyle = el.getAttribute('style') || ''
+            const cleanedStyle = originalStyle.replace(
+              /lab\([^)]*\)/g,
+              '#ffffff'
+            )
+            if (cleanedStyle !== originalStyle) {
+              console.log('[PDF] lab() 색상 정리:', originalStyle)
+              el.setAttribute('style', cleanedStyle)
+            }
+          }
+        }
       })
 
+      console.log('[PDF] 클래스 및 스타일 정리 완료')
+
       // HTML을 Canvas로 캡처
-      const canvas = await html2canvas(clonedElement, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: '#ffffff',
-        logging: false,
-        allowTaint: true,
-        removeContainer: true,
-      })
+      let canvas
+      try {
+        console.log('[PDF] html2canvas 옵션으로 캡처 시작')
+        canvas = await html2canvas(clonedElement, {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: '#ffffff',
+          logging: true,
+          allowTaint: true,
+          removeContainer: true,
+          imageTimeout: 0,
+        })
+        console.log('[PDF] 캔버스 생성 완료:', canvas.width, 'x', canvas.height)
+      } catch (canvasError) {
+        console.error('[PDF] html2canvas 오류 상세:', canvasError)
+        console.error(
+          '[PDF] 오류 타입:',
+          canvasError instanceof Error ? canvasError.name : typeof canvasError
+        )
+        throw new Error(
+          `html2canvas 오류: ${canvasError instanceof Error ? canvasError.message : String(canvasError)}`
+        )
+      }
 
       // Canvas를 PNG 이미지로 변환
       const imgData = canvas.toDataURL('image/png')
+      console.log('[PDF] 이미지 데이터 변환 완료')
 
       // PDF 문서 생성
       const pdf = new jsPDF({
@@ -68,19 +110,30 @@ export function PdfDownloadButton({
 
       pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight)
 
+      console.log('[PDF] PDF 문서 생성 완료')
+
       // PDF 파일명: 견적서_INV-XXXX-XXX.pdf
       const filename = `견적서_${invoice.invoiceNumber}.pdf`
       pdf.save(filename)
+
+      console.log('[PDF] PDF 저장 완료:', filename)
     } catch (error) {
-      console.error('PDF 다운로드 오류:', error)
-      alert('PDF 다운로드에 실패했습니다.')
+      const errorMessage =
+        error instanceof Error ? error.message : String(error)
+      console.error('[PDF] 다운로드 오류 (상세):', errorMessage)
+      console.error('[PDF] 전체 에러 객체:', error)
+      alert(`PDF 다운로드 실패: ${errorMessage}`)
     } finally {
       setIsLoading(false)
     }
   }
 
   return (
-    <Button onClick={handleDownload} disabled={isLoading} className="gap-2">
+    <Button
+      onClick={handleDownload}
+      disabled={isLoading}
+      className="cursor-pointer gap-2"
+    >
       {isLoading ? '생성 중...' : children}
     </Button>
   )

@@ -1,15 +1,15 @@
-import { Metadata } from 'next'
-import Link from 'next/link'
-import { Button } from '@/components/ui/button'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Separator } from '@/components/ui/separator'
 import { InvoiceDetail } from '@/components/invoices/invoice-detail'
 import { InvoiceItemsTable } from '@/components/invoices/invoice-items-table'
+import { InvoicePdfTemplate } from '@/components/invoices/invoice-pdf-template'
 import { InvoiceSummary } from '@/components/invoices/invoice-summary'
 import { PdfDownloadButton } from '@/components/invoices/pdf-download-button'
-import { InvoicePdfTemplate } from '@/components/invoices/invoice-pdf-template'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
+import { Separator } from '@/components/ui/separator'
 import { getInvoiceById } from '@/lib/notion/invoice-service'
 import { AlertCircle } from 'lucide-react'
+import { Metadata } from 'next'
+import Link from 'next/link'
 
 interface InvoiceDetailPageProps {
   params: Promise<{ id: string }>

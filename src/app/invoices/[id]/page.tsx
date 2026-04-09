@@ -7,6 +7,7 @@ import { InvoiceDetail } from '@/components/invoices/invoice-detail'
 import { InvoiceItemsTable } from '@/components/invoices/invoice-items-table'
 import { InvoiceSummary } from '@/components/invoices/invoice-summary'
 import { PdfDownloadButton } from '@/components/invoices/pdf-download-button'
+import { InvoicePdfTemplate } from '@/components/invoices/invoice-pdf-template'
 import { getInvoiceById } from '@/lib/notion/invoice-service'
 import { AlertCircle } from 'lucide-react'
 
@@ -61,6 +62,11 @@ export default async function InvoiceDetailPage({
 
   return (
     <div className="container mx-auto py-8">
+      {/* PDF 템플릿 (숨김) - html2canvas로 캡처용 */}
+      <div className="absolute top-0 -left-[9999px]">
+        <InvoicePdfTemplate invoice={invoice} />
+      </div>
+
       {/* 헤더 */}
       <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div>
@@ -74,7 +80,7 @@ export default async function InvoiceDetailPage({
           <Link href="/invoices">
             <Button variant="outline">뒤로가기</Button>
           </Link>
-          <PdfDownloadButton>PDF 다운로드</PdfDownloadButton>
+          <PdfDownloadButton invoice={invoice}>PDF 다운로드</PdfDownloadButton>
         </div>
       </div>
 

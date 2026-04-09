@@ -5,6 +5,7 @@ import {
   initializeDataSourceId,
 } from './client'
 import { transformNotionPageToInvoice } from './transformers'
+import { getItemsByInvoiceId } from './items-service'
 import type { Invoice, InvoiceListParams, PaginatedResponse } from '@/types'
 
 /**
@@ -92,7 +93,7 @@ export async function getInvoiceList(
 }
 
 /**
- * Notion API에서 단일 견적서 조회
+ * Notion API에서 단일 견적서 조회 (상품 목록 포함)
  * Notion 페이지 ID로 직접 조회
  */
 export async function getInvoiceById(
@@ -102,7 +103,19 @@ export async function getInvoiceById(
     const page = await getNotionClient().pages.retrieve({
       page_id: invoiceId,
     })
-    return transformNotionPageToInvoice(page as PageObjectResponse)
+    const invoice = transformNotionPageToInvoice(page as PageObjectResponse)
+
+    // Items 조회 추가
+    try {
+      const items = await getItemsByInvoiceId(invoiceId)
+      invoice.items = items
+    } catch (error) {
+      // Items 조회 실패해도 Invoice는 반환 (graceful degradation)
+      console.warn('[getInvoiceById] Items 조회 실패:', error)
+      invoice.items = []
+    }
+
+    return invoice
   } catch (error) {
     console.error('[getInvoiceById] Notion API 오류:', error)
     return null

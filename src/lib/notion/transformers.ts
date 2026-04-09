@@ -1,5 +1,5 @@
 import type { PageObjectResponse } from '@notionhq/client/build/src/api-endpoints'
-import type { Invoice, InvoiceStatus } from '@/types'
+import type { Invoice, InvoiceItem, InvoiceStatus } from '@/types'
 
 /**
  * Notion 상태값을 Invoice 영문 상태로 매핑
@@ -82,6 +82,16 @@ function extractEmail(prop: any): string {
 }
 
 /**
+ * Notion 프로퍼티에서 Relation 값 추출 (첫번째 연결된 ID)
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function extractRelation(prop: any): string {
+  if (!prop || prop.type !== 'relation') return ''
+  const relations = prop.relation ?? []
+  return relations.length > 0 ? relations[0].id : ''
+}
+
+/**
  * Notion 페이지를 Invoice 타입으로 변환
  *
  * @param page Notion API에서 반환된 PageObjectResponse
@@ -115,5 +125,34 @@ export function transformNotionPageToInvoice(
     expiryDate: extractDate(props['유효기간']),
     notes: extractRichText(props['비고']) || undefined,
     syncedAt: page.last_edited_time,
+  }
+}
+
+/**
+ * Notion 페이지를 InvoiceItem 타입으로 변환
+ *
+ * @param page Notion API에서 반환된 PageObjectResponse
+ * @returns InvoiceItem 타입으로 변환된 객체
+ */
+export function transformNotionPageToInvoiceItem(
+  page: PageObjectResponse
+): InvoiceItem {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const props = page.properties as any
+
+  // CSV 데이터 기반 프로퍼티명: 항목명, invoices (Relations), 수량, 단가, 금액
+  const itemName = extractTitle(props['항목명']) || ''
+  const invoiceId = extractRelation(props['invoices']) || ''
+  const quantity = extractNumber(props['수량'])
+  const unitPrice = extractNumber(props['단가'])
+  const amount = extractNumber(props['금액'])
+
+  return {
+    id: page.id,
+    invoiceId,
+    itemName,
+    quantity,
+    unitPrice,
+    amount,
   }
 }

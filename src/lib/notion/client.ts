@@ -38,6 +38,19 @@ export let INVOICE_DATA_SOURCE_ID =
   process.env.NOTION_INVOICE_DATA_SOURCE_ID ?? ''
 
 /**
+ * 상품(Items) 데이터베이스 ID
+ * Notion 데이터베이스 URL에서 추출된 32자리 ID
+ */
+export const ITEMS_DATABASE_ID = process.env.NOTION_ITEMS_DATABASE_ID ?? ''
+
+/**
+ * 상품(Items) 데이터소스 ID
+ * Notion이 deprecated한 databases.query 대신 dataSources.query를 사용하기 위해 필요
+ * (첫 로드 시 데이터베이스에서 동적으로 가져옴)
+ */
+export let ITEMS_DATA_SOURCE_ID = process.env.NOTION_ITEMS_DATA_SOURCE_ID ?? ''
+
+/**
  * 견적서 데이터소스 ID를 초기화합니다.
  * 환경 변수에 없으면 데이터베이스 조회로부터 가져옵니다.
  */
@@ -59,6 +72,32 @@ export async function initializeDataSourceId(): Promise<void> {
       INVOICE_DATA_SOURCE_ID = dataSources[0].id
     }
   } catch (error) {
-    console.error('데이터소스 ID를 초기화할 수 없습니다:', error)
+    console.error('견적서 데이터소스 ID를 초기화할 수 없습니다:', error)
+  }
+}
+
+/**
+ * 상품(Items) 데이터소스 ID를 초기화합니다.
+ * 환경 변수에 없으면 데이터베이스 조회로부터 가져옵니다.
+ */
+export async function initializeItemsDataSourceId(): Promise<void> {
+  if (ITEMS_DATA_SOURCE_ID) {
+    return
+  }
+
+  try {
+    const notionClient = getNotionClient()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const database = await (notionClient as any).databases.retrieve({
+      database_id: ITEMS_DATABASE_ID,
+    })
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const dataSources = (database as any).data_sources
+    if (dataSources && dataSources.length > 0) {
+      ITEMS_DATA_SOURCE_ID = dataSources[0].id
+    }
+  } catch (error) {
+    console.error('상품(Items) 데이터소스 ID를 초기화할 수 없습니다:', error)
   }
 }

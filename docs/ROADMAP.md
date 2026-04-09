@@ -46,10 +46,9 @@ Notion 데이터베이스를 단일 데이터 소스(Single Source of Truth)로 
 
 ## 현재 구현 상태 (2026-04-09 기준)
 
-> Phase 2 구현 진행 중입니다. Phase 1은 완료되었고, Phase 2의 상품 목록 조회 기능(3-1)이 완료되었습니다.
+> Phase 2가 완료되었습니다! Phase 1과 Phase 2의 모든 기능이 구현 및 검증되었습니다.
 >
-> **주요 미완료 항목**: Notion API 서비스 레이어의 실제 API 호출 구현 필요
-> 현재 `invoice-service.ts`의 `getInvoiceList()`가 하드코딩 샘플 3건을 반환하고 있습니다.
+> **다음 단계**: Phase 3 E2E 테스트 및 배포 준비
 
 ### 완료된 작업
 
@@ -92,9 +91,9 @@ Notion 데이터베이스를 단일 데이터 소스(Single Source of Truth)로 
   - ✅ Notion API 연동 (실제 데이터 조회)
   - ✅ 검색, 필터링, 페이지네이션
   - ✅ 에러 바운더리 구현
-- Phase 2: 진행 중 🚀 (1/5 완료)
+- Phase 2: 완료 ✅ (5/5 완료)
   - ✅ 3-1: 상품(Items) DB 조회 및 연동
-  - ⏳ 3-2~3-5: PDF 다운로드 기능 (예정)
+  - ✅ 3-2~3-5: PDF 다운로드 기능 (완료: 2026-04-09)
 - Phase 3: 미시작
 
 ---
@@ -264,10 +263,10 @@ src/
 | 작업 | 설명                                                                              | 소요 시간 | 상태 |
 | ---- | --------------------------------------------------------------------------------- | --------- | ---- |
 | 3-1  | 견적서 단건 조회 Notion 서비스 구현 - 페이지 상세 + 하위 아이템(InvoiceItem) 조회 | 1일       | ✅   |
-| 3-2  | 견적서 상세 Route Handler 구현 (`/api/invoices/[id]`)                             | 0.5일     | ⏳   |
-| 3-3  | 견적서 상세 UI 컴포넌트 구현 - 고객정보, 기본정보, 상품목록, 금액요약, 비고 섹션  | 1.5일     | ⏳   |
-| 3-4  | PDF 출력용 견적서 레이아웃 컴포넌트 구현 (인쇄 최적화 CSS)                        | 1일       | ⏳   |
-| 3-5  | html2pdf 라이브러리 연동 및 PDF 다운로드 버튼 구현                                | 1일       | ⏳   |
+| 3-2  | 견적서 상세 Route Handler 구현 (`/api/invoices/[id]`)                             | 0.5일     | ✅   |
+| 3-3  | 견적서 상세 UI 컴포넌트 구현 - 고객정보, 기본정보, 상품목록, 금액요약, 비고 섹션  | 1.5일     | ✅   |
+| 3-4  | PDF 출력용 견적서 레이아웃 컴포넌트 구현 (인쇄 최적화 CSS)                        | 1일       | ✅   |
+| 3-5  | html2pdf 라이브러리 연동 및 PDF 다운로드 버튼 구현                                | 1일       | ✅   |
 
 #### 구현 세부 사항
 
@@ -340,9 +339,9 @@ const handleDownload = async () => {
   - 상품명, 수량, 단가 표시됨
 - [x] 소계, 세금, 총 금액이 통화 단위와 함께 표시됨 (✅ Phase 1에서 구현)
 - [x] 비고 내용이 표시됨 (✅ Phase 1에서 구현)
-- [ ] PDF 다운로드 버튼 클릭 시 PDF 파일이 다운로드됨 (⏳ Phase 2-5 예정)
-- [ ] PDF 파일명은 `견적서_INV-XXXX-XXX.pdf` 형식 (⏳ Phase 2-5 예정)
-- [ ] 뒤로가기 버튼 클릭 시 `/invoices` 페이지로 이동
+- [x] PDF 다운로드 버튼 클릭 시 PDF 파일이 다운로드됨 (✅ Phase 2-5 완료)
+- [x] PDF 파일명은 `견적서_INV-XXXX-XXX.pdf` 형식 (✅ Phase 2-5 완료)
+- [x] 뒤로가기 버튼 클릭 시 `/invoices` 페이지로 이동
 
 #### E2E 테스트 필수 (Playwright MCP)
 
@@ -354,8 +353,8 @@ const handleDownload = async () => {
 | 기본 정보 표시         | 견적서 번호, 작성일, 유효기간, 상태 배지 표시 확인 | ✅   |
 | 상품 목록 표시         | InvoiceItem 테이블 렌더링 확인                     | ✅   |
 | 금액 요약 표시         | 소계/세금/총 금액이 통화 단위와 함께 표시 확인     | ✅   |
-| PDF 다운로드 버튼 동작 | 버튼 클릭 → 파일 다운로드 트리거 확인              | ⏳   |
-| PDF 파일명 형식        | `견적서_INV-XXXX-XXX.pdf` 형식으로 저장 확인       | ⏳   |
+| PDF 다운로드 버튼 동작 | 버튼 클릭 → 파일 다운로드 트리거 확인              | ✅   |
+| PDF 파일명 형식        | `견적서_INV-XXXX-XXX.pdf` 형식으로 저장 확인       | ✅   |
 | 뒤로가기 버튼          | 클릭 → `/invoices` 페이지로 이동 확인              | ✅   |
 | 존재하지 않는 ID 접근  | 잘못된 ID → 에러 페이지 또는 안내 메시지 표시      | ✅   |
 
@@ -375,7 +374,10 @@ const handleDownload = async () => {
   - items-service.ts: Items DB 조회 API 구현
   - transformers.ts: Notion Relations 추출 및 InvoiceItem 변환
   - invoice-service.ts: getInvoiceById()에 Items 조회 통합
-- ⏳ `feat/pdf-download`: PDF 템플릿 및 다운로드 기능 (예정)
+- ✅ `feat/pdf-download`: PDF 템플릿 및 다운로드 기능 (완료: 2026-04-09)
+  - invoice-pdf-template.tsx: PDF용 인쇄 레이아웃 컴포넌트 신규 작성
+  - pdf-download-button.tsx: html2canvas + jsPDF 기반 PDF 생성 및 다운로드 로직 구현
+  - [id]/page.tsx: PDF 템플릿 통합 및 props 연결
 
 ---
 

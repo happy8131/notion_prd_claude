@@ -53,7 +53,7 @@ export default function AdminAuthPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+    <div className="bg-background flex min-h-screen items-center justify-center px-4">
       <div className="w-full max-w-md space-y-6">
         {/* 헤더 */}
         <div className="space-y-2 text-center">
@@ -122,7 +122,10 @@ export default function AdminAuthPage() {
 
         {/* 돌아가기 링크 */}
         <div className="text-center">
-          <Link href="/" className="text-sm text-muted-foreground hover:underline">
+          <Link
+            href="/"
+            className="text-muted-foreground text-sm hover:underline"
+          >
             홈으로 돌아가기
           </Link>
         </div>

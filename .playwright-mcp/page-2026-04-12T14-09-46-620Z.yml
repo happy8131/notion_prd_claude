@@ -1,0 +1,81 @@
+- generic:
+  - generic:
+    - generic:
+      - generic:
+        - heading [level=1]: 견적서 목록
+        - paragraph: Notion에서 동기화된 견적서 목록입니다
+      - button [expanded]:
+        - img
+    - generic:
+      - generic:
+        - generic:
+          - generic: 검색 (견적서 번호 또는 고객명)
+          - textbox:
+            - /placeholder: 검색어를 입력하세요
+        - generic:
+          - generic: 상태
+          - combobox:
+            - generic: 전체
+            - img
+        - generic:
+          - generic: 통화
+          - combobox:
+            - generic: 전체
+            - img
+      - generic:
+        - generic:
+          - generic: 발행일 (시작)
+          - textbox
+        - generic:
+          - generic: 발행일 (종료)
+          - textbox
+        - generic:
+          - button: 초기화
+    - generic:
+      - generic:
+        - table:
+          - rowgroup:
+            - row:
+              - columnheader: 견적서 번호
+              - columnheader: 고객명
+              - columnheader: 금액
+              - columnheader: 상태
+              - columnheader: 발행일
+              - columnheader: 유효기간
+          - rowgroup:
+            - row:
+              - cell:
+                - link:
+                  - /url: /invoices/31485627-029d-8131-ac0c-f27ff3b013a3
+                  - text: INV-2026-002
+              - cell: XYZ 디자인
+              - cell: ₩1,450,000
+              - cell:
+                - generic: 대기
+              - cell: 2026. 02. 27.
+              - cell: 2026. 03. 29.
+            - row:
+              - cell:
+                - link:
+                  - /url: /invoices/31485627-029d-806a-b90e-c2890a88dbcc
+                  - text: INV-2025-001
+              - cell: ABC 회사
+              - cell: ₩500,000
+              - cell:
+                - generic: 대기
+              - cell: 2026. 02. 04.
+              - cell: 2026. 02. 27.
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e69] [cursor=pointer]:
+    - img [ref=e70]
+  - alert
+  - menu "테마 변경" [active] [ref=e74]:
+    - menuitem "라이트" [ref=e75]:
+      - img
+      - text: 라이트
+    - menuitem "다크" [ref=e76]:
+      - img
+      - text: 다크
+    - menuitem "시스템" [ref=e77]:
+      - img
+      - text: 시스템

@@ -53,10 +53,10 @@ export function InvoiceListTable({ invoices }: { invoices: Invoice[] }) {
   }
 
   return (
-    <div className="rounded-lg border border-gray-200">
+    <div className="border-border rounded-lg border">
       <Table>
         <TableHeader>
-          <TableRow className="bg-gray-50">
+          <TableRow className="bg-muted/50">
             <TableHead className="h-12 font-semibold">견적서 번호</TableHead>
             <TableHead className="h-12 font-semibold">고객명</TableHead>
             <TableHead className="h-12 text-right font-semibold">
@@ -72,7 +72,7 @@ export function InvoiceListTable({ invoices }: { invoices: Invoice[] }) {
             const expired = isExpired(invoice.expiryDate, invoice.status)
 
             return (
-              <TableRow key={invoice.id} className="hover:bg-gray-50">
+              <TableRow key={invoice.id} className="hover:bg-muted/50">
                 <TableCell className="font-medium text-blue-600">
                   <Link
                     href={`/invoices/${invoice.id}`}

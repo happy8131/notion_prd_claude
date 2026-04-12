@@ -16,6 +16,8 @@ import type { InvoiceFilterValues } from '@/lib/validations/invoice'
 
 interface InvoiceFilterBarProps {
   defaultValues?: InvoiceFilterValues
+  /** 필터 초기화 시 이동할 기본 경로 (기본값: '/invoices') */
+  basePath?: string
 }
 
 /**
@@ -26,7 +28,10 @@ interface InvoiceFilterBarProps {
  * - 날짜 범위 필터 (Phase 2에서 확장)
  * - URL searchParams 자동 업데이트
  */
-export function InvoiceFilterBar({ defaultValues }: InvoiceFilterBarProps) {
+export function InvoiceFilterBar({
+  defaultValues,
+  basePath = '/invoices',
+}: InvoiceFilterBarProps) {
   const router = useRouter()
 
   // 검색어 상태 관리
@@ -65,15 +70,15 @@ export function InvoiceFilterBar({ defaultValues }: InvoiceFilterBarProps) {
     setDateFrom('')
     setDateTo('')
     setCurrency('')
-    router.push('/invoices')
-  }, [router])
+    router.push(basePath)
+  }, [router, basePath])
 
   return (
-    <div className="mb-6 space-y-4 rounded-lg border border-gray-200 bg-white p-4">
+    <div className="border-border bg-card mb-6 space-y-4 rounded-lg border p-4">
       <div className="grid gap-4 md:grid-cols-3">
         {/* 검색 입력 */}
         <div className="flex-1">
-          <label className="mb-2 block text-sm font-medium text-gray-700">
+          <label className="text-foreground mb-2 block text-sm font-medium">
             검색 (견적서 번호 또는 고객명)
           </label>
           <Input
@@ -86,7 +91,7 @@ export function InvoiceFilterBar({ defaultValues }: InvoiceFilterBarProps) {
 
         {/* 상태 필터 */}
         <div className="flex-1">
-          <label className="mb-2 block text-sm font-medium text-gray-700">
+          <label className="text-foreground mb-2 block text-sm font-medium">
             상태
           </label>
           <Select value={status} onValueChange={setStatus}>
@@ -104,7 +109,7 @@ export function InvoiceFilterBar({ defaultValues }: InvoiceFilterBarProps) {
 
         {/* 통화 필터 */}
         <div className="flex-1">
-          <label className="mb-2 block text-sm font-medium text-gray-700">
+          <label className="text-foreground mb-2 block text-sm font-medium">
             통화
           </label>
           <Select value={currency} onValueChange={setCurrency}>
@@ -122,7 +127,7 @@ export function InvoiceFilterBar({ defaultValues }: InvoiceFilterBarProps) {
       <div className="grid gap-4 md:grid-cols-3">
         {/* 시작일 필터 */}
         <div className="flex-1">
-          <label className="mb-2 block text-sm font-medium text-gray-700">
+          <label className="text-foreground mb-2 block text-sm font-medium">
             발행일 (시작)
           </label>
           <Input
@@ -135,7 +140,7 @@ export function InvoiceFilterBar({ defaultValues }: InvoiceFilterBarProps) {
 
         {/* 종료일 필터 */}
         <div className="flex-1">
-          <label className="mb-2 block text-sm font-medium text-gray-700">
+          <label className="text-foreground mb-2 block text-sm font-medium">
             발행일 (종료)
           </label>
           <Input
@@ -160,7 +165,7 @@ export function InvoiceFilterBar({ defaultValues }: InvoiceFilterBarProps) {
 
       {/* 활성 필터 표시 */}
       {(search || status || dateFrom || dateTo || currency) && (
-        <div className="flex flex-wrap gap-2 text-sm text-gray-600">
+        <div className="text-muted-foreground flex flex-wrap gap-2 text-sm">
           {search && <span>검색: {search}</span>}
           {status && (
             <span>

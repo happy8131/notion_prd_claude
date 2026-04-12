@@ -7,6 +7,7 @@ import { InvoiceListTable } from '@/components/invoices/invoice-list-table'
 import { InvoicePagination } from '@/components/invoices/invoice-pagination'
 import { InvoiceListSkeleton } from '@/components/invoices/invoice-list-skeleton'
 import { EmptyState } from '@/components/invoices/empty-state'
+import { ThemeToggle } from '@/components/ui/theme-toggle'
 
 export const metadata: Metadata = {
   title: '견적서 목록',
@@ -52,12 +53,15 @@ export default async function InvoicesPage({
 
   return (
     <div className="container mx-auto py-8">
-      {/* 페이지 제목 */}
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold">견적서 목록</h1>
-        <p className="text-muted-foreground mt-2">
-          Notion에서 동기화된 견적서 목록입니다
-        </p>
+      {/* 페이지 헤더 (제목 + 테마 토글) */}
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">견적서 목록</h1>
+          <p className="text-muted-foreground mt-2">
+            Notion에서 동기화된 견적서 목록입니다
+          </p>
+        </div>
+        <ThemeToggle />
       </div>
 
       {/* 검색/필터 바 */}

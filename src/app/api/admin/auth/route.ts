@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 
 /**
  * 관리자 인증 API
- * POST /admin/auth
+ * POST /api/admin/auth
  *
  * 요청: { password: string }
  * 응답: { success: boolean, message: string }

@@ -24,7 +24,7 @@ export default function AdminAuthPage() {
     setLoading(true)
 
     try {
-      const response = await fetch('/admin/auth', {
+      const response = await fetch('/api/admin/auth', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ password }),
